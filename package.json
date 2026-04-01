@@ -1,6 +1,6 @@
 {
-  "name": "ops-ai-chat",
-  "version": "1.0.0",
-  "description": "OPS AI — OWNR OPS Training Assistant chat widget",
-  "private": true
+    "name": "ops-ai-chat",
+    "version": "1.0.1",
+    "description": "OPS AI - OWNR OPS Training Assistant chat widget",
+    "private": true
 }

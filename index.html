@@ -22,6 +22,8 @@
     .header-right { display: flex; align-items: center; gap: 12px; }
     .header-badge { font-size: 11px; background: rgba(228,96,12,0.15); color: #E4600C; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
     .header-user { font-size: 12px; color: #888; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .new-chat-btn { background: #E4600C; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .new-chat-btn:hover { background: #d45500; }
     .logout-btn { background: none; border: 1px solid #444; color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
     .logout-btn:hover { border-color: #666; color: #fff; }
 
@@ -67,11 +69,12 @@
 
     /* Input */
     .input-area { padding: 16px 24px; border-top: 1px solid #333; background: #1a1a1a; }
-    .input-container { display: flex; align-items: flex-end; gap: 8px; max-width: 800px; }
-    .input-wrapper { flex: 1; background: #2a2a2a; border: 1px solid #444; border-radius: 12px; padding: 0 16px; }
-    .input-wrapper textarea { width: 100%; background: none; border: none; color: #fff; font-size: 14px; padding: 14px 0; resize: none; outline: none; font-family: inherit; line-height: 1.4; max-height: 160px; }
+    .input-container { display: flex; align-items: stretch; gap: 0; max-width: 800px; }
+    .input-wrapper { flex: 1; background: #2a2a2a; border: 1px solid #444; border-radius: 12px 0 0 12px; padding: 12px 16px; display: flex; align-items: center; }
+    .input-wrapper textarea { width: 100%; background: none; border: none; color: #fff; font-size: 14px; padding: 0; resize: none; outline: none; font-family: inherit; line-height: 1.4; max-height: 160px; }
     .input-wrapper textarea::placeholder { color: #666; }
-    .send-btn { width: 44px; height: 44px; background: #E4600C; border: none; border-radius: 10px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .send-btn { width: 44px; height: 44px; background: #E4600C; border: none; border-radius: 0 12px 12px 0; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+    .send-btn:hover:not(:disabled) { background: #d45500; }
     .send-btn:disabled { opacity: 0.4; cursor: default; }
     .send-btn svg { width: 18px; height: 18px; }
     .input-footer { text-align: center; font-size: 11px; color: #555; margin-top: 8px; }
@@ -402,6 +405,11 @@ function App() {
     }
   }
 
+  function handleNewChat() {
+    setMessages([]);
+    setInput('');
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     setMessages([]);
@@ -434,6 +442,7 @@ function App() {
       h('div', { className: 'header-right' },
         h('div', { className: 'header-badge' }, '1,600+ Videos Indexed'),
         h('div', { className: 'header-user' }, userEmail),
+        h('button', { className: 'new-chat-btn', onClick: handleNewChat }, 'New Chat'),
         h('button', { className: 'logout-btn', onClick: handleLogout }, 'Sign Out')
       )
     ),

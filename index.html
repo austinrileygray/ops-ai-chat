@@ -245,7 +245,8 @@
       width: 5px; height: 5px; border-radius: 50%;
       background: var(--orange); flex-shrink: 0;
     }
-    .source-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .source-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-source); text-decoration: none; }
+    a.source-title:hover { color: var(--orange); text-decoration: underline; }
     .source-type {
       font-size: 10px; padding: 1px 6px; border-radius: 4px;
       background: rgba(255,255,255,0.05); color: var(--text-dim);
@@ -253,7 +254,7 @@
     }
     .source-sim { font-size: 10px; color: var(--text-dim); flex-shrink: 0; }
 
-    /* ─── Typing ─── */
+    /* ─── Typing / Loading ─── */
     .typing { display: flex; align-items: center; gap: 4px; padding: 8px 0; }
     .typing-dot {
       width: 5px; height: 5px; background: var(--orange);
@@ -265,18 +266,24 @@
       0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
       30% { opacity: 1; transform: translateY(-3px); }
     }
+    .loading-status {
+      font-size: 11px; color: var(--text-dim); margin-top: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
 
     /* ─── New conversation ─── */
     .new-chat-btn {
-      position: absolute; top: 12px; right: 12px;
       background: var(--bg-input); border: 1px solid var(--border);
       border-radius: var(--radius-sm); color: var(--text-dim);
       padding: 6px 12px; font-size: 11px; font-weight: 500;
-      cursor: pointer; font-family: inherit; z-index: 5;
-      display: none; transition: all 0.15s;
+      cursor: pointer; font-family: inherit;
+      transition: all 0.15s; white-space: nowrap;
     }
     .new-chat-btn:hover { border-color: var(--orange); color: var(--orange); }
-    .new-chat-btn.visible { display: block; }
 
     /* ─── Input Area ─── */
     .input-area {
@@ -368,9 +375,13 @@
 
     // ─── Source Item ───
     function SourceItem({ source }) {
+      const title = source.title || 'Untitled';
+      const url = source.url || source.source_url || null;
       return h('div', { className: 'source-item' },
         h('span', { className: 'source-dot' }),
-        h('span', { className: 'source-title' }, source.title || 'Untitled'),
+        url
+          ? h('a', { className: 'source-title', href: url, target: '_blank', rel: 'noopener noreferrer' }, title)
+          : h('span', { className: 'source-title' }, title),
         source.type && h('span', { className: 'source-type' }, source.type),
         h('span', { className: 'source-sim' }, Math.round((source.similarity || 0) * 100) + '%')
       );
@@ -387,10 +398,13 @@
         h('div', { className: 'msg-content' },
           h('div', { className: 'msg-role' }, isAI ? 'OPS AI' : 'You'),
           typing
-            ? h('div', { className: 'typing' },
-                h('span', { className: 'typing-dot' }),
-                h('span', { className: 'typing-dot' }),
-                h('span', { className: 'typing-dot' })
+            ? h('div', null,
+                h('div', { className: 'typing' },
+                  h('span', { className: 'typing-dot' }),
+                  h('span', { className: 'typing-dot' }),
+                  h('span', { className: 'typing-dot' })
+                ),
+                h('div', { className: 'loading-status' }, 'Searching training library...')
               )
             : h('div', { className: 'msg-text', dangerouslySetInnerHTML: { __html: htmlContent } }),
           sources && sources.length > 0 && h('div', { className: 'sources' },
@@ -646,6 +660,7 @@
             )
           ),
           h('div', { className: 'header-right' },
+            messages.length > 0 && h('button', { className: 'new-chat-btn', onClick: startNewChat }, '+ New Chat'),
             h('span', { className: 'stats-badge' }, sourceCount + ' videos indexed'),
             h('span', { className: 'tier-badge ' + TIER_CLASSES[tier] }, TIER_LABELS[tier]),
             session
@@ -655,12 +670,6 @@
               : h('button', { className: 'auth-btn', onClick: () => setShowAuth(true) }, 'Sign In')
           )
         ),
-
-        // New chat button
-        h('button', {
-          className: 'new-chat-btn' + (messages.length > 0 ? ' visible' : ''),
-          onClick: startNewChat
-        }, '+ New Chat'),
 
         // Chat area
         h('div', { className: 'chat-area', ref: chatRef },
